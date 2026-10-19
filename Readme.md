@@ -24,6 +24,28 @@ git clone -b mt7986 --single-branch https://github.com/padavanonly/immortalwrtAR
 ```bash
 git clone -b openwrt-21.02 --single-branch https://github.com/hanwckf/immortalwrt-mt798x
 ```
+- chasey-dev-[chasey-dev/immortalwrt-mt798x-rebase](https://github.com/chasey-dev/immortalwrt-mt798x-rebase)（**25.12，内核 6.12**）.
+```bash
+git clone -b 25.12 --single-branch https://github.com/chasey-dev/immortalwrt-mt798x-rebase
+```
+
+## 新增：immortalwrt-25.12（内核 6.12 + 闭源驱动，110MB 布局）
+
+`immortalwrt-25.12/Redmi-AX6000/` 是给 `chasey-dev/immortalwrt-mt798x-rebase@25.12` 用的云编译配置，
+对应的 workflow 是 `.github/workflows/Redmi-AX6000-immortalwrt-25.12.yml`（手动触发，不跟随 push）。
+
+| 项目 | 旧（hanwckf 21.02） | 新（25.12） |
+| --- | --- | --- |
+| 内核 | 5.4 | 6.12 |
+| mt_wifi | 7.6.7.3 | 7.6.7.3 |
+| 设备 profile | `xiaomi_redmi-router-ax6000` | `xiaomi_redmi-router-ax6000-mtkuboot` |
+| UBI 分区 | 110MB | 110MB（**同布局**） |
+| compatible | `xiaomi,redmi-router-ax6000` | `xiaomi,redmi-router-ax6000-mtkuboot` |
+
+注意事项：
+1. `-mtkuboot` 变体只认 hanwckf 的 110MB 不死 uboot，**不要**下 `-stock` / `-ubootmod`，刷错直接变砖。
+2. 因为 `compatible` 变了，从 21.02 直接 `sysupgrade` 会被 board 校验拦下来；要么 `sysupgrade -F`，要么在 uboot web 里刷 `factory.bin`。
+3. 闭源驱动的配置块（`CONFIG_PACKAGE_kmod-mt_wifi` 一直到 `CONFIG_first_card_name`）不要手改，workflow 里已经加了校验，被 `make defconfig` 吃掉会直接中断编译。
 
 ## Redmi AX6000 开源驱动固件 源码来源
 - OpenWrt官方-[openwrt/openwrt](https://github.com/openwrt/openwrt).
