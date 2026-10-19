@@ -10,7 +10,10 @@
 ###############改名字##############
 name: Redmi-AX6000-hanwckf_Build
 
-on: [push]
+on:
+  workflow_dispatch:
+  repository_dispatch:
+#  push:
 #  schedule:
 #    - cron: 0 16 * * *
 
@@ -30,7 +33,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     
     steps:
     - name: 检查项目分支
