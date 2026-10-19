@@ -47,7 +47,19 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+        # 先腾地方：runner 预装的 SDK / 工具链对编译毫无用处，删掉能多出 25G 左右。
+        # 上一轮就是磁盘写满挂的（72G 盘只剩 30G，全量编译吃到 100%，最后的 rust/readline
+        # 报错其实都是 "No space left on device" 的连带症状）。
+        sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /opt/hostedtoolcache \
+                    /usr/share/swift /usr/local/share/boost /usr/local/.ghcup /usr/local/lib/node_modules \
+                    /opt/microsoft /opt/google /opt/az /usr/share/miniconda 2>/dev/null || true
+        sudo docker image prune --all --force 2>/dev/null || true
+        sudo apt-get -qq clean || true
+        echo "清理后磁盘："
+        df -hT /
+        avail=$(df --output=avail -BG / | tail -1 | tr -dc '0-9')
+        echo "根分区可用 ${avail:-?}G"
+        [ "${avail:-0}" -ge 30 ] || { echo "::error::可用磁盘只有 ${avail}G，全量编译会中途写满（建议 ≥30G）"; exit 1; }
         sudo -E apt-get -qq update
         # 必需依赖（装不上就直接失败）
         sudo -E apt-get -qq install -y build-essential clang flex bison g++ g++-multilib gcc-multilib \
@@ -125,7 +137,9 @@ jobs:
         cd openwrt
         export FORCE_UNSAFE_CONFIGURE=1
         echo -e "$(nproc) thread compile"
+        echo "编译前磁盘："; df -hT /
         make -j$(nproc) || make -j1 || make -j1 V=s
+        echo "编译后磁盘："; df -hT /
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=$(cat DEVICE_NAME)" >> $GITHUB_ENV
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*TARGET_.*_(.*)_DEVICE_.*=y/\1/' > TARGET_NAME
