@@ -32,7 +32,7 @@ luci-i18n-turboacc-mtk-zh-cn
 luci-app-eqos-mtk
 luci-i18n-eqos-mtk-zh-cn
 !luci-app-openclash
-luci-i18n-openclash-zh-cn
+# luci-app-openclash 没有独立 i18n 包（po/zh-cn 直接编进主包），不要写 luci-i18n-openclash-zh-cn
 !luci-app-passwall
 luci-i18n-passwall-zh-cn
 luci-compat
@@ -45,7 +45,8 @@ luci-app-arpbind
 luci-i18n-arpbind-zh-cn
 luci-app-upnp
 luci-i18n-upnp-zh-cn
-miniupnpd
+# 25.12 把 miniupnpd 拆成 nftables / iptables 两个变体，默认变体的真实包名是 miniupnpd-nftables
+miniupnpd-nftables
 luci-app-vlmcsd
 luci-i18n-vlmcsd-zh-cn
 vlmcsd
@@ -90,7 +91,8 @@ kmod-ifb
 kmod-inet-diag
 kmod-nft-socket
 kmod-nft-compat
-!fullconenat-nft
+# 源码目录叫 fullconenat-nft，但 KernelPackage 定义的是 nft-fullcone，真包名是 kmod-nft-fullcone
+!kmod-nft-fullcone
 kmod-nf-nathelper-extra
 kmod-sched-core
 kmod-sched-cake
@@ -122,4 +124,5 @@ kmod-crypto-sha512
 kmod-lib-crc32c
 kmod-lib-lzo
 kmod-leds-ws2812b
-TURBOACC_INCLUDE_NO_FASTPATH
+# TURBOACC_INCLUDE_NO_FASTPATH 不是包名，是 luci-app-turboacc（旧版）的 config 符号，
+# 而且 mtk 版没有这个符号，写在这里只会每次报警，已删除。

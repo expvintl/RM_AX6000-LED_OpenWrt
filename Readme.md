@@ -51,6 +51,7 @@ git clone -b 25.12 --single-branch https://github.com/chasey-dev/immortalwrt-mt7
 
 `.config` 里的包清单已按老固件的 `opkg-installed.txt` 对齐过一遍，重点保证**内核模块不缺**。
 另外 `packages.list` + `check-packages.sh` 会在 `make defconfig` 之后逐个核对，关键包被丢弃直接中断编译。
+检查脚本会顺手归因：包定义还在 → 是依赖不满足被丢；只出现在 `PROVIDES` 里 → 是虚名；两者都没有 → 改名/只在第三方 feed。
 
 对齐结论（有变化的几类）：
 
@@ -58,8 +59,10 @@ git clone -b 25.12 --single-branch https://github.com/chasey-dev/immortalwrt-mt7
 | --- | --- | --- |
 | `iptables` / `iptables-mod-*` / `kmod-ipt-*` | 不用手写 | 25.12 的 `iptables` 命令仍在（1.8.10，默认变体 `iptables-nft`，规则自动翻译成 nftables）；mwan3 2.12.0 的 DEPENDS 会自己把 `iptables`+`ipset`+2 个模块拉进来 |
 | `ipset` / `kmod-ipt-ipset` | 同上 | 由 mwan3 → ipset → `kmod-ipt-ipset` 自动带入 |
-| `iptables-mod-fullconenat` | `fullconenat-nft` | 全锥 NAT 换成 nft 实现 |
-| `luci-app-turboacc` | `luci-app-turboacc-mtk` | 改名 |
+| `iptables-mod-fullconenat` | `kmod-nft-fullcone` | 全锥 NAT 换成 nft 实现；源码目录叫 `fullconenat-nft`，但 KernelPackage 定义的是 `nft-fullcone`，**包名要写 `kmod-nft-fullcone`** |
+| `luci-app-turboacc` | `luci-app-turboacc-mtk` | 改名；旧版那两个 `TURBOACC_INCLUDE_*` 符号在 mtk 版里不存在，写了也会被吃掉 |
+| `miniupnpd` | `miniupnpd-nftables` | 拆成 nftables / iptables 两个变体，`miniupnpd` 只是 PROVIDES 出来的虚名 |
+| `libcap-bin` | `libcap-bin` + `libcap` | 它的 `DEPENDS` 写的是不带 `+` 的 `libcap`（只依赖不选中），不同时打开 `libcap` 就会被 defconfig 丢掉 |
 | `datconf-lua` | `datconf` | 改名 |
 | `ipv6helper` | 无 | 25.12 源码树里已无此包 |
 | `luci-app-filetransfer` | 无 | LuCI 已移除该插件 |
