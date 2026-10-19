@@ -112,6 +112,9 @@ jobs:
         grep -q '^CONFIG_MTK_WIFI_SKU_TYPE="AX6000"' .config \
           || { echo "::error::MTK_WIFI_SKU_TYPE 不是 AX6000"; exit 1; }
         grep -E '^(CONFIG_MTK_MT_WIFI_DRIVER_VERSION_.*|CONFIG_MTK_MT_WIFI_FIRMWARE_PATH_MT7986.*)=' .config || true
+        # 逐个核对包清单：源码树里不存在的包会被 defconfig 静默删掉，这里让它响
+        chmod +x $GITHUB_WORKSPACE/immortalwrt-25.12/Redmi-AX6000/check-packages.sh
+        $GITHUB_WORKSPACE/immortalwrt-25.12/Redmi-AX6000/check-packages.sh .config
         make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;

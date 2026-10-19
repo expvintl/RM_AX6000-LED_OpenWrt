@@ -47,6 +47,30 @@ git clone -b 25.12 --single-branch https://github.com/chasey-dev/immortalwrt-mt7
 2. 因为 `compatible` 变了，从 21.02 直接 `sysupgrade` 会被 board 校验拦下来；要么 `sysupgrade -F`，要么在 uboot web 里刷 `factory.bin`。
 3. 闭源驱动的配置块（`CONFIG_PACKAGE_kmod-mt_wifi` 一直到 `CONFIG_first_card_name`）不要手改，workflow 里已经加了校验，被 `make defconfig` 吃掉会直接中断编译。
 
+### 软件包清单对齐（相对老固件）
+
+`.config` 里的包清单已按老固件的 `opkg-installed.txt` 对齐过一遍，重点保证**内核模块不缺**。
+另外 `packages.list` + `check-packages.sh` 会在 `make defconfig` 之后逐个核对，关键包被丢弃直接中断编译。
+
+对齐结论（有变化的几类）：
+
+| 老固件（21.02） | 新固件（25.12） | 说明 |
+| --- | --- | --- |
+| `iptables` / `iptables-mod-*` / `kmod-ipt-*` | 不需要 | 25.12 是 firewall4 + nftables；openclash 0.47 / passwall 26.10 也都已改成 nft 后端 |
+| `ipset` / `kmod-ipt-ipset` | 不需要 | 同上，改用 nft set |
+| `iptables-mod-fullconenat` | `fullconenat-nft` | 全锥 NAT 换成 nft 实现 |
+| `luci-app-turboacc` | `luci-app-turboacc-mtk` | 改名 |
+| `datconf-lua` | `datconf` | 改名 |
+| `ipv6helper` | 无 | 25.12 源码树里已无此包 |
+| `luci-app-filetransfer` | 无 | LuCI 已移除该插件 |
+| `easytier` / `luci-app-easytier` | 官方源没有 | 需要第三方 feed，或在系统里 `opkg install` |
+| `kmod-mtd-rw` | 无 | 25.12 源码树里没有，写了也会被静默删掉 |
+
+保留并对齐的：`kmod-tun`、`kmod-wireguard`、`kmod-macvlan`、`kmod-ifb`、`kmod-inet-diag`、
+`kmod-nft-tproxy`、`kmod-sched-cake`、`kmod-tcp-bbr`、`kmod-nf-nathelper-extra`、
+`adguardhome`、`mwan3`、`luci-app-arpbind`、`vlmcsd`、`umurmur-openssl`、`6in4`、
+`luci-app-mtk`、`coreutils` 系列、`libcap-bin`、`zoneinfo-asia` 等。
+
 ## Redmi AX6000 开源驱动固件 源码来源
 - OpenWrt官方-[openwrt/openwrt](https://github.com/openwrt/openwrt).
 ```bash
