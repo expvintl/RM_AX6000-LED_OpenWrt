@@ -56,8 +56,8 @@ git clone -b 25.12 --single-branch https://github.com/chasey-dev/immortalwrt-mt7
 
 | 老固件（21.02） | 新固件（25.12） | 说明 |
 | --- | --- | --- |
-| `iptables` / `iptables-mod-*` / `kmod-ipt-*` | 不需要 | 25.12 是 firewall4 + nftables；openclash 0.47 / passwall 26.10 也都已改成 nft 后端 |
-| `ipset` / `kmod-ipt-ipset` | 不需要 | 同上，改用 nft set |
+| `iptables` / `iptables-mod-*` / `kmod-ipt-*` | 不用手写 | 25.12 的 `iptables` 命令仍在（1.8.10，默认变体 `iptables-nft`，规则自动翻译成 nftables）；mwan3 2.12.0 的 DEPENDS 会自己把 `iptables`+`ipset`+2 个模块拉进来 |
+| `ipset` / `kmod-ipt-ipset` | 同上 | 由 mwan3 → ipset → `kmod-ipt-ipset` 自动带入 |
 | `iptables-mod-fullconenat` | `fullconenat-nft` | 全锥 NAT 换成 nft 实现 |
 | `luci-app-turboacc` | `luci-app-turboacc-mtk` | 改名 |
 | `datconf-lua` | `datconf` | 改名 |

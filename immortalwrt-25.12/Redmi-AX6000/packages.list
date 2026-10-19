@@ -2,7 +2,8 @@
 # 语法：一行一个包名；行首加 ! 表示「关键包」，被 defconfig 吃掉就让编译直接失败
 # 不带 ! 的只告警，不中断（版本差异导致的可选项）
 #
-# 生成方式：从本目录 .config 里所有 CONFIG_PACKAGE_xxx=y 抽取，人工标注关键项
+# 注意：mwan3 会连带拉入 iptables(nft 变体) + ipset + 两个 iptables-mod-*，
+#       所以这些不在列表里，但最终镜像里一定有。
 
 !luci-theme-argon
 luci-app-argon-config
@@ -102,10 +103,6 @@ kmod-nls-iso8859-1
 kmod-nls-utf8
 kmod-ata-core
 kmod-scsi-core
-ebtables
-kmod-ebtables
-kmod-ebtables-ipv4
-kmod-ebtables-ipv6
 kmod-crypto-acompress
 kmod-crypto-ccm
 kmod-crypto-cmac
